@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+  </head>
+  <body>
+    <h1>Google Driveの論文PDFをNotionに同期するやつ</h1>
+    <button onclick="startRunning()">データベースをアップデート</button><br><br>
+    <span id="status-display">（上のボタンを押してスクリプトを実行してください）</span>
+
+    <script>
+      var update = null;
+      function startRunning(){
+        // 500msおきにステータスを取得する
+        // もっといいやり方がないものか…
+        update = setInterval(updateStatus, 500);
+        google.script.run.withFailureHandler(onFailure).refreshAllFiles();
+      }
+
+      // 表示を更新するための関数
+      function updateStatus() {
+        // ローディング表示
+        // document.getElementById('time-display').innerText = '取得中...';
+        
+        google.script.run
+          .withSuccessHandler(updateDisplay) // 成功したら updateDisplay 関数を呼ぶ
+          .withFailureHandler(onFailure)   // 失敗したら onFailure 関数を呼ぶ
+          .getStatus();
+      }
+
+      // 成功時のコールバック関数
+      function updateDisplay(status) {
+        document.getElementById('status-display').innerHTML = status;
+        if(status.includes("files waiting for update."))
+          clearInterval(update);
+      }
+
+      // 失敗時のコールバック関数
+      function onFailure(error) {
+        alert('Error: ' + error.message);
+      }
+    </script>
+  </body>
+</html>
